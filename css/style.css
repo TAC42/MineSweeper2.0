@@ -1,0 +1,50 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #111;
+    font-family: Arial, Helvetica, sans-serif;
+    /* text-align: justify; */
+    text-align: center;
+}
+.game {
+    padding: 20px;
+    width: max-content;
+    margin: 30px auto;
+    background: darkgray;
+}
+.board{
+    margin:auto;
+    border: 20px;
+    border-color:rgb(128, 128, 128);
+    box-shadow: 1px 1px lightgray, -.5em 0 .3em lightgray;
+}
+.cell {
+    background: whitesmoke;
+    font-size: 1.5em;
+    width: 2em;
+    height: 2em;
+}
+
+.closed {
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
+}
+.open0 {
+    color: rgba(0, 0, 0, 0);
+}
+.open1 {
+    color: rgba(0, 0, 255,);
+}
+.open2 {
+    color: rgb(0, 128, 0);
+}
+.open3 {
+    color: rgba(255, 0, 0);
+}
+.open4 {
+    color: rgb(91, 30, 148);
+}
+.over {
+    background-color:red;
+}
