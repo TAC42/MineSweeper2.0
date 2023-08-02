@@ -4,21 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>MineSweeper2.0</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body onload="onInit()">
+<body onload="onInit()" >
     <div class="game">
-        <h1>MINE SWEEPER</h1>
+        <h1 class="smiley" onclick="onChangeSmiley(this)" >😀</h1>
+        <div class="level">
+            <p>Difficulty:</p>
+            <button onclick="onChangeLevel('0')">Novice</button>
+            <button onclick="onChangeLevel('1')">Intermediate</button>
+            <button onclick="onChangeLevel('2')">Expert</button>
+        </div>
         <table>
-            <tbody class="board">
+            <tbody class="board" >
                 <!-- this is my board -->
             </tbody>
         </table>
     </div>
     <script src="js/main.js"></script>
     <script src="js/utils.js"></script>
+
+    <footer>
+        <small>
+          Copyright © 2023 TAC. All Rights Reserved.
+        </small>
+      </footer>
+    </body>
 
 </body>
 
