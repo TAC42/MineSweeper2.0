@@ -3,24 +3,13 @@
 
 const MINE = '💣'
 const FLAG = '🚩'
-/* This is an object in which you can keep and update the
- current game state: isOn: Boolean, when true we let the user
-  play shownCount: How many cells are shown markedCount:
- How many cells are marked (with a flag)
-secsPassed: How many seconds passed */
-var gGame = {
-    isOn: false,
-    lives: 3,
-    shownCount: 0,
-    markedCount: 0,
-    secsPassed: 0
-}
+
+var gGame // Object that contains all counters and state of the game
 
 //MODEL: A Matrix containing cell objects: Each cell: 
 var gBoard
 var gFirstCellClicked
-
-
+var gTimeInterval
 
 //DOM: This is an object by which the board size is set (in this case: 4x4 board and how many mines to place)
 var gLevel = {
@@ -29,16 +18,16 @@ var gLevel = {
 }
 
 
-//TODO: This is called when page loads
+//This is called when page loads
 function onInit() {
+    resetGameValues()
     gBoard = buildBoard()
     renderBoard(gBoard)
     gFirstCellClicked = true
 
 }
 
-/*TODO: Builds the board Set the mines Call
- setMinesNegsCount() Return the created board*/
+//MODEL: Builds the board 
 function buildBoard() {
     gBoard = []
     for (var i = 0; i < gLevel.SIZE; i++) {
@@ -48,7 +37,8 @@ function buildBoard() {
                 minesAroundCount: 0,
                 isShown: false,
                 isMine: false,
-                isMarked: false
+                isMarked: false,
+                isExpand: false
             }
         }
 
@@ -58,20 +48,19 @@ function buildBoard() {
     return board
 }
 
+//Set mines randomly and then traverse the board adding neighbor numerical values to each cell
 function setMines(board) {
     var count = 0
     while (count !== gLevel.MINES) {
         var i = getRandomInt(0, gLevel.SIZE)
         var j = getRandomInt(0, gLevel.SIZE)
-        
+
         if (!board[i][j].isMine) {
             board[i][j].isMine = true
             count++
         }
     }
 
-    // board[0][3].isMine = true
-    // board[2][2].isMine = true
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[0].length; j++) {
             board[i][j].minesAroundCount = setMinesNegsCount(i, j)
@@ -80,8 +69,8 @@ function setMines(board) {
     return board
 }
 
-/*TODO: Count mines around each cell 
-and set the cell's minesAroundCount. */
+/* Count mines around each cell 
+and set the neighbor numerical values for each cell */
 function setMinesNegsCount(rowIdx, colIdx) {
     var count = 0
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
@@ -96,16 +85,17 @@ function setMinesNegsCount(rowIdx, colIdx) {
     return count
 }
 
-//TODO: Render the board as a <table> to the page
+//DOM: Render the board as a <table> to the page
 function renderBoard(board) {
     var strHTML = ''
     for (var i = 0; i < gLevel.SIZE; i++) {
-        strHTML += `<tr>\n` //class="game-row"
+        strHTML += `<tr>\n`
         for (var j = 0; j < gLevel.SIZE; j++) {
             const cell = board[i][j]
             var className = ''
             var inCell = ''
-            // For classes: cell of type closed/open ==> if open: conditions to neg  
+            /*This part Condition to find the right classes: 
+             cell of type closed/open ==> if open: adding neighboring mines*/
             if (!cell.isShown) {
                 className = 'closed'
                 if (gBoard[i][j].isMarked) {
@@ -113,8 +103,6 @@ function renderBoard(board) {
                     inCell = FLAG
                 }
             } else {
-                //cell.isShown = true
-
                 //if it's a mine 
                 if (cell.isMine) {
                     className = 'mine'
@@ -122,42 +110,13 @@ function renderBoard(board) {
                 } else {
                     className = 'open'
                     //now we add-on the count of neighboring mines
-                    switch (cell.minesAroundCount) {
-                        case 0:
-                            className += '0'
-                            break;
-                        case 1:
-                            className += '1'
-                            inCell = 1
-                            break;
-                        case 2:
-                            className += '2'
-                            inCell = 2
-                            break;
-                        case 3:
-                            className += '3'
-                            inCell = 3
-                            break;
-                        case 4:
-                            className += '4'
-                            inCell = 4
-                            break;
-                            case 5:
-                            className += '5'
-                            inCell = 5
-                            break;
-                            case 6:
-                            className += '6'
-                            inCell = 6
-                            break;
-
-                    }
-
+                    className += cell.minesAroundCount
+                    if (cell.minesAroundCount) inCell = cell.minesAroundCount
                 }
             }
             // rendering in DOM for all cells with all cases
-            strHTML += `\t<td class="cell ${className}" oncontextmenu="onCellMarked(this, ${i}, ${j});return false;" 
-            onclick="onCellClicked(this, ${i}, ${j})">${inCell}</td>\n`
+            strHTML += `\t<td class="cell ${className}" data-i="${i}" data-j="${j}" oncontextmenu="onCellMarked(this, ${i}, ${j});return false;" 
+            onclick="onCellClicked( ${i}, ${j})">${inCell}</td>\n`
             // maybe will need this later: data-i="${i}" data-j="${j}" 
 
         }
@@ -171,76 +130,106 @@ function renderBoard(board) {
 
 
 
-//TODO: Called when a cell is clicked onCellMarked(elCell)
-function onCellClicked(elCell, i, j) {
-    bewilderedSmiley()
+//Called when a cell is left clicked 
+function onCellClicked(i, j) {
+    if (!gGame.isOn) return //if the game didn't start. automatically true at the beginning
+    if (gBoard[i][j].isMarked) return //if cell is marked do nothing
+    if (gBoard[i][j].isShown) return //if cell is shown do nothing
+    stateOfSmiley(1)
     while (gFirstCellClicked && gBoard[i][j].isMine) {
         onInit()
     }
-    if (gBoard[i][j].isMarked) return
-
-    gFirstCellClicked = false
-    if (gBoard[i][j].isMine) {
-        // gGame.isOn = false
-
-        elCell.classList.add('over')
-        checkGameOver(gGame.isOn)
+    if (gFirstCellClicked) { // if the first cell was clicked
+        startTimer()
+        gFirstCellClicked = false
     }
-    if (gBoard[i][j].isMarked) return
 
-    if (!gBoard[i][j].isShown) {
-        gBoard[i][j].isShown = true
+    if (gBoard[i][j].isMine) { //if you hit a mine!!!
+        if(gGame.life > 1) playSoundMine()
+        stateOfSmiley(3)
+        resetOrRemoveLife(false)
+        gGame.markedCount++
+    } else {
         gGame.shownCount++
-        expandShown( i, j) //elCell and board param removed - no usage
+        if (gBoard[i][j].minesAroundCount === 0) {
+            expandShown(i, j) //elCell and board param removed - no usage
+            gGame.shownCount--
+        }
     }
+    gBoard[i][j].isShown = true // Update MODEL
+    renderBoard(gBoard) // Update DOM
     checkGameOver()
 }
 
-//TODO: Called when a cell is right- clicked
-//see how you can hide the context menu on right click
+//On right click toggles Mark on a closed cell
 function onCellMarked(elCell, i, j) {
+    if (gBoard[i][j].isShown) return //if cell is shown do nothing
+    //Update Model
     (gBoard[i][j].isMarked) ? gGame.markedCount-- : gGame.markedCount++
     gBoard[i][j].isMarked = !gBoard[i][j].isMarked
+    //Update DOM
+    elCell.innerText = (gBoard[i][j].isMarked) ? FLAG : ''
     checkGameOver()
-    renderBoard(gBoard)
     return false
 }
 
 /*TODO: Game ends when all mines are marked, and all the other cells are shown */
 function checkGameOver() {
-    console.log(`The gMarked is: ${gGame.markedCount}
-    The gLevel.MINES is: ${gLevel.MINES}
-    The gGame.shownCount is: ${gGame.shownCount}
-    The total Shown counts on the board ${((gLevel.SIZE**2)-gLevel.MINES)}`)
+    if (gGame.life === 0) {
+        playSoundFail()
+        stateOfSmiley(4)
+        gGame.isOn = false
+        clearInterval(gTimeInterval)
+        showAllMines()
+
+        return true
+    }
+    //winning!
     if (gGame.markedCount === gLevel.MINES &&
-        gGame.shownCount === (gLevel.SIZE**2)-gLevel.MINES){
-            console.log('YOU WON!!!!!!:');
+        gGame.shownCount === (gLevel.SIZE ** 2) - gLevel.MINES) {
+        stateOfSmiley(5)
+        clearInterval(gTimeInterval)
+        gGame.isOn = false
+        playSoundWinning()
+        return true
+    }
+    return false
+}
+
+//Traverse through the board to reveal all the mines when the game is lost
+function showAllMines() {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[0].length; j++) {
+            if (gBoard[i][j].isMine) gBoard[i][j].isShown = true
         }
+    }
+    renderBoard(gBoard)
 }
 
 
-/*TODO: When user clicks a cell with no mines around, we need to open not only that cell, 
-but also its neighbors. NOTE: start with a basic implementation that only opens
- the non-mine 1st degree neighbors BONUS: if you have the time later, try to work 
- more like the real algorithm (see description at the Bonuses section below) */
-function expandShown(rowIdx, colIdx) { //elCell and board param removed - no usage
-
+/*Expand the board using neighboring cells and recursion  */
+function expandShown(rowIdx, colIdx) {
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
         if (i < 0 || i >= gBoard.length) continue
         for (var j = colIdx - 1; j <= colIdx + 1; j++) {
             if (i === rowIdx && j === colIdx) continue
             if (j < 0 || j >= gBoard[0].length) continue
-            if (!gBoard[i][j].isMine && !gBoard[i][j].isMarked && !gBoard[i][j].isShown){
-                 gBoard[i][j].isShown = true
-                 gGame.shownCount++
+            if (!gBoard[i][j].isMine && !gBoard[i][j].isMarked && !gBoard[i][j].isShown) {
+                gBoard[i][j].isShown = true
+                gGame.shownCount++
+
+                if (gBoard[i][j].minesAroundCount === 0 && !gBoard[i][j].isExpand) {
+                    gBoard[i][j].isExpand = true
+                    expandShown(i, j)
+                }
             }
-            //if (gBoard[i][j].minesAroundCount) expandShown( i, j)
         }
     }
     renderBoard(gBoard)
 
 }
 
+// change the level of the game
 function onChangeLevel(level) {
     switch (level) {
         case '0':
@@ -248,7 +237,6 @@ function onChangeLevel(level) {
             gLevel.MINES = 2
             onInit()
             break;
-            
         case '1':
             gLevel.SIZE = 8
             gLevel.MINES = 14
@@ -261,29 +249,78 @@ function onChangeLevel(level) {
             break;
     }
 }
-function onChangeSmiley(elBtn){
-    bewilderedSmiley()
-    restartGame()
+// when clicking smiley you reset the game!
+function onChangeSmiley() {
+    stateOfSmiley(1)
+    onInit()
 }
-function bewilderedSmiley(){
-    const elBtn = document.querySelector('.smiley')
-    elBtn.innerText = '😮'
+function onUseSafeClick(elBtn) {
+    if (gGame.safe === 0) return // when there are no more safe clicks: do nothing.
+    const emptyPOS = getEmptyCell()
+    // if there are no empty cells left:
+    if (emptyPOS === null) {
+        alert('No empty cells left!')
+        return
+    }
+    gGame.safe--
+    var safeClick = ''
+    for (var i = 0; i < gGame.safe; i++) safeClick += '🛟'
+    elBtn.innerText = safeClick
+
+    const elEmptyCell = document.querySelector(`[data-i="${emptyPOS.i}"][data-j="${emptyPOS.j}"]`)
+    elEmptyCell.innerText = '🛟'
     setTimeout(() => {
-     elBtn.innerText = '😀'   
+        elEmptyCell.innerText = ''
+    }, 1250);
+
+}
+// make smiley transition look cooler!
+function stateOfSmiley(index) {
+    const smileys = ['😀', '😮', '😫', '🤯', '☠️', '👑']
+    const elBtn = document.querySelector('.smiley')
+    elBtn.innerText = (index === 4) ? smileys[index - 1] : smileys[index]
+    setTimeout(() => {
+        elBtn.innerText = (index === 4) ? smileys[4] : smileys[0]
+        if (index === 5) elBtn.innerText = smileys[index]
     }, 250);
 }
-function restartGame(){
-    gGame = gGame = {
-        isOn: false,
-        lives: 3,
+
+//reset the game when: 1. game Starts 2. You click the reset button (Smiley)
+function resetGameValues() {
+    gGame = {
+        isOn: true,
+        life: 3,
+        safe: 3,
         shownCount: 0,
         markedCount: 0,
         secsPassed: 0
     }
     gFirstCellClicked = false
-    gLevel = {
-        SIZE: 4,
-        MINES: 2
+    stopTimer()
+    resetTime()
+    resetOrRemoveLife(true)
+    const elBtn = document.querySelector('.safe')
+    elBtn.innerText = '🛟🛟🛟'
+}
+
+//removes a life or reset life in case of reset! true = reset // false = lose 1 life
+function resetOrRemoveLife(lifeSwitch) {
+    const elBtn = document.querySelector('.life')
+    var hearts = ''
+    if (!lifeSwitch) {
+        if (gGame.life === 1) {
+            elBtn.innerText = '🪦'
+            gGame.life--
+            checkGameOver()
+            return
+        }
+        //Modal:
+        gGame.life--
     }
-    onInit()   
+    //DOM:
+    for (var i = 0; i < gGame.life; i++) {
+        hearts += '💖'
+    }
+    elBtn.innerHTML = hearts
+
 }

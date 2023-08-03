@@ -4,28 +4,90 @@
 
 body {
     background: #111;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: fantasy, Helvetica, sans-serif;
     /* text-align: justify; */
     text-align: center;
+    background: url(../img/mines.png) repeat center center fixed;
 }
+/* 
+
+.hover06 figure img {
+	-webkit-transform: rotate(15deg) scale(1.4);
+	transform: rotate(15deg) scale(1.4);
+	-webkit-transition: .3s ease-in-out;
+	transition: .3s ease-in-out;
+}
+.hover06 figure:hover img {
+	-webkit-transform: rotate(0) scale(1);
+	transform: rotate(0) scale(1);
+} */
+
 
 .game {
     padding: 20px;
     width: max-content;
     margin: 30px auto;
+    width: 600px;
     background: darkgray;
+    border-style: ridge;
+    border: 5px 20px;
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
+    margin-inline: auto;
+    border-radius: 50px / 15px;
+    opacity: 85%;
+}
+.smiley{
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
+    background-color: lightgrey;
+    width: max-content;
+    height: auto;
+    margin: 0 auto;
+    position: relative;
+    font-size: 3.5rem;
+    border-style: ridge;
+    border: 2px 1px;
+
+}
+.level, .life ,.safe{ 
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
+    background-color: lightgrey;
+    border-style: ridge;
+    border: 2px 1px;
+    width: max-content;
+    display:inline-flex;
+    margin: 20px 20px 10px;
+    padding: 6px;
+    
+}
+.life, .safe {
+    font-size: 1.5rem;
+    width: 100px;
+    
 }
 
-.level {
-    margin-bottom: 5%;
+button{
+    background-color: lightgrey;
+    font-size: 2rem;
+    margin-right: 5px 0px 15px;
 }
 
-.board {
+.time {
+    display: inline-flex;
+    font-size: 1.50em;
+    border-style: ridge;
+    border: 2px 1px;
+    margin-bottom: 10px;
+}
+
+
+table {
     margin: auto;
     border: 20px;
     border-color: rgb(128, 128, 128);
     box-shadow: 1px 1px lightgray, -.5em 0 .3em lightgray;
     font-weight: bold;
+    margin-inline: auto;
+    
 }
 
 .cell {
@@ -33,11 +95,14 @@ body {
     font-size: 1.5em;
     width: 2em;
     height: 2em;
+   
 }
 
 .closed {
     box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
     background-color: lightgrey;
+    border-style: ridge;
+    border-right-width: 2px;
 }
 
 .open0 {
@@ -70,5 +135,5 @@ footer {
     background-color: #abbaba;
     color: #000;
     bottom: 0;
-    display:inline-block;
+    display: inline-block;
 }

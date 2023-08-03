@@ -8,17 +8,24 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body onload="onInit()" >
+<body  onload="onInit()">
+    
     <div class="game">
-        <h1 class="smiley" onclick="onChangeSmiley(this)" >😀</h1>
+        <h1 class="smiley" onclick="onChangeSmiley()">😀</h1>
+        <div class="safe" onclick="onUseSafeClick(this)">🛟🛟🛟</div>
         <div class="level">
-            <p>Difficulty:</p>
-            <button onclick="onChangeLevel('0')">Novice</button>
-            <button onclick="onChangeLevel('1')">Intermediate</button>
-            <button onclick="onChangeLevel('2')">Expert</button>
+            <button onclick="onChangeLevel('0')">👶</button>
+            <button onclick="onChangeLevel('1')">🧒</button>
+            <button onclick="onChangeLevel('2')">🫅</button>
+        </div>
+        <div class="life">💖💖💖</div>
+        <div class="time">
+            <div class="minutes"></div>
+            <div>:</div>
+            <div class="seconds"></div>
         </div>
         <table>
-            <tbody class="board" >
+            <tbody class="board">
                 <!-- this is my board -->
             </tbody>
         </table>
@@ -28,10 +35,10 @@
 
     <footer>
         <small>
-          Copyright © 2023 TAC. All Rights Reserved.
+            Copyright © 2023 TAC. All Rights Reserved.
         </small>
-      </footer>
-    </body>
+    </footer>
+</body>
 
 </body>
 
