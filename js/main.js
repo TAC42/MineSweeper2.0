@@ -133,6 +133,10 @@ function renderBoard(board) {
 //Called when a cell is left clicked 
 function onCellClicked(i, j) {
     if (!gGame.isOn) return //if the game didn't start. automatically true at the beginning
+    if (gGame.hintOn) { // uses a hint!
+        getHint({ i, j })
+        return
+    }
     if (gBoard[i][j].isMarked) return //if cell is marked do nothing
     if (gBoard[i][j].isShown) return //if cell is shown do nothing
     stateOfSmiley(1)
@@ -145,7 +149,7 @@ function onCellClicked(i, j) {
     }
 
     if (gBoard[i][j].isMine) { //if you hit a mine!!!
-        if(gGame.life > 1) playSoundMine()
+        if (gGame.life > 1) playSoundMine()
         stateOfSmiley(3)
         resetOrRemoveLife(false)
         gGame.markedCount++
@@ -289,8 +293,10 @@ function stateOfSmiley(index) {
 function resetGameValues() {
     gGame = {
         isOn: true,
+        hintOn: false,
         life: 3,
         safe: 3,
+        hint: 3,
         shownCount: 0,
         markedCount: 0,
         secsPassed: 0
@@ -301,6 +307,10 @@ function resetGameValues() {
     resetOrRemoveLife(true)
     const elBtn = document.querySelector('.safe')
     elBtn.innerText = '🛟🛟🛟'
+    for (var i = 0; i < 3; i++) {
+        const elBtn = document.querySelector(`.light${i+1}`)
+        elBtn.classList.remove('hide')
+    }
 }
 
 //removes a life or reset life in case of reset! true = reset // false = lose 1 life
@@ -322,5 +332,56 @@ function resetOrRemoveLife(lifeSwitch) {
         hearts += '💖'
     }
     elBtn.innerHTML = hearts
+
+}
+
+function onUseHint(elBtn) {
+    elBtn.classList.add('highlight')
+    gGame.hintOn = true
+}
+function getHint(cellPos) {
+    gGame.hintOn = false
+    const elBtn = document.querySelector(`.light${gGame.hint}`)
+    elBtn.classList.remove('highlight')
+    elBtn.classList.add('hide')
+    gGame.hint--
+    const rowIdx = cellPos.i
+    const colIdx = cellPos.j
+
+    for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+        for (var j = colIdx - 1; j <= colIdx + 1; j++) {
+            if (j < 0 || j >= gBoard[0].length) continue
+            if (!gBoard[i][j].isShown) {
+                gBoard[i][j].isShown = true
+                const elCell = document.querySelector(`[data-i="${i}"][data-j="${j}"]`)
+                if (gBoard[i][j].isMine) {
+                    elCell.classList.remove('closed')
+                    elCell.classList.add('mine')
+                    elCell.innerText = MINE
+                } else {
+                    elCell.classList.remove('closed')
+                    elCell.classList.add(`open${gBoard[i][j].minesAroundCount}`)
+                    elCell.innerText = gBoard[i][j].minesAroundCount
+                }
+                elCell.classList.add('highlight')
+            }
+        }
+    }
+
+    setTimeout(() => {
+        for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
+            if (i < 0 || i >= gBoard.length) continue
+            for (var j = colIdx - 1; j <= colIdx + 1; j++) {
+                if (j < 0 || j >= gBoard[0].length) continue
+                const elCell = document.querySelector(`[data-i="${i}"][data-j="${j}"]`)
+                if (elCell.classList.contains('highlight')) {
+                    gBoard[i][j].isShown = false
+                    elCell.classList.remove('highlight')
+                }
+            }
+        }
+        renderBoard(gBoard)
+    }, 2000);
 
 }

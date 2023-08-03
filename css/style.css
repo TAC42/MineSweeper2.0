@@ -9,6 +9,7 @@ body {
     text-align: center;
     background: url(../img/mines.png) repeat center center fixed;
 }
+
 /* 
 
 .hover06 figure img {
@@ -36,7 +37,8 @@ body {
     border-radius: 50px / 15px;
     opacity: 85%;
 }
-.smiley{
+
+.smiley {
     box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
     background-color: lightgrey;
     width: max-content;
@@ -48,29 +50,49 @@ body {
     border: 2px 1px;
 
 }
-.level, .life ,.safe{ 
+
+
+.level,
+.life,
+.safe {
     box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
     background-color: lightgrey;
     border-style: ridge;
     border: 2px 1px;
     width: max-content;
-    display:inline-flex;
-    margin: 20px 20px 10px;
+    display: inline-flex;
+    margin: 10px 20px 10px;
     padding: 6px;
-    
-}
-.life, .safe {
-    font-size: 1.5rem;
-    width: 100px;
-    
+
 }
 
-button{
+
+.life,
+.safe {
+    font-size: 1.5rem;
+    width: 100px;
+
+}
+.hint {
+    font-size: 1.5rem;
+    width: 100px;
+    margin: 0px 20px 10px;
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.15);
+    background-color: lightgrey;
+    border-style: ridge;
+    border: 2px 1px;
+    width: max-content;
+    display: inline-flex;
+}
+
+button {
     background-color: lightgrey;
     font-size: 2rem;
     margin-right: 5px 0px 15px;
 }
-
+.hint{
+    position:relative;
+}
 .time {
     display: inline-flex;
     font-size: 1.50em;
@@ -87,7 +109,7 @@ table {
     box-shadow: 1px 1px lightgray, -.5em 0 .3em lightgray;
     font-weight: bold;
     margin-inline: auto;
-    
+
 }
 
 .cell {
@@ -95,7 +117,7 @@ table {
     font-size: 1.5em;
     width: 2em;
     height: 2em;
-   
+
 }
 
 .closed {
@@ -136,4 +158,10 @@ footer {
     color: #000;
     bottom: 0;
     display: inline-block;
+}
+.highlight {
+    background-color: yellow;
+}
+.hide{
+    display: none;
 }
