@@ -179,6 +179,7 @@ function onCellMarked(elCell, i, j) {
 
 /*TODO: Game ends when all mines are marked, and all the other cells are shown */
 function checkGameOver() {
+    //Losing!
     if (gGame.life === 0) {
         playSoundFail()
         stateOfSmiley(4)
@@ -195,6 +196,7 @@ function checkGameOver() {
         clearInterval(gTimeInterval)
         gGame.isOn = false
         playSoundWinning()
+        checkBestTime()
         return true
     }
     return false
@@ -308,7 +310,7 @@ function resetGameValues() {
     const elBtn = document.querySelector('.safe')
     elBtn.innerText = '🛟🛟🛟'
     for (var i = 0; i < 3; i++) {
-        const elBtn = document.querySelector(`.light${i+1}`)
+        const elBtn = document.querySelector(`.light${i + 1}`)
         elBtn.classList.remove('hide')
     }
 }
@@ -385,3 +387,137 @@ function getHint(cellPos) {
     }, 2000);
 
 }
+
+// Display or set new score record and write it to a file for each difficulty 
+function checkBestTime() {
+    const topScoreFiles = ['data/easy.csv', 'data/average.csv', 'data/expert.csv']
+    var level
+    var difficulty = ''
+    switch (gLevel.SIZE) { // check the level of the game
+        case 4:
+            level = 0
+            difficulty = 'NOVICE'
+            break;
+        case 8:
+            level = 1
+            difficulty = 'INTERMEDIATE'
+            break;
+        case 12:
+            level = 2
+            difficulty = 'EXPERT'
+            break;
+    }
+    const fs = require('fs')
+    fs.readFile(topScoreFiles[level], 'utf8', (err, data) => {
+        if (err) {
+            console.log('err:', err);
+            return
+        }
+        const lines = data.trim().split('\n');
+        const fileInfo = []
+        for (var i = 0; i < lines.length; i++) {
+            fileInfo[i] = []
+            const tempCells = lines[i].split(',')
+            for (var j = 0; j < 3; j++) {
+                fileInfo[i][j] = tempCells[j]
+            }
+        }
+        const elSec = document.querySelector('seconds')
+        const elMin = document.querySelector('minutes')
+        var newScoreTime = elMin.innerText + ':' + elSec.innerText
+        var compTempScoreTime = (+elMin.innerText * 60) + (+elSec.innerText)
+
+
+        if (fileInfo.length < 5) {
+            addNewTopScore(fileInfo, newScoreTime, -1, difficulty)
+        } else {
+            for (var i = 0; i < fileInfo.length; i++) {
+                const min = +fileInfo[i][1].slice(0, 2);
+                const sec = +fileInfo[i][1].slice(3, 5);
+
+                const time = sec + min * 60
+                if (time < compTempScoreTime) {
+                    addNewTopScore(fileInfo, newScoreTime, i,difficulty)
+                    return
+                }
+            }
+            addNewTopScore(fileInfo, newScoreTime, NaN, difficulty)
+        }
+    })
+}
+
+function addNewTopScore(fileInfo, currScoreTime, rowIdx, difficulty) {
+    const newFileInfo = []
+    if(rowIdx === NaN){
+        renderNewTopScore(newFileInfo, difficulty)
+        displayTopScores()
+        return
+    }
+    if (rowIdx !== -1) {
+        for (var i = 0; i < fileInfo.length; i++) {
+            newFileInfo[i] = []
+            if (rowIdx < i) {
+                newFileInfo[i] = fileInfo[i]
+            } else if (rowIdx == i) {
+                newFileInfo[i] = [prompt(`Congratulations! You have reached a new best time Score!
+                Please enter your name:`), currScoreTime, getDate()]
+            } else {
+                newFileInfo[i + 1] = fileInfo[i]
+            }
+        }
+    } else {
+        newFileInfo = fileInfo
+        newFileInfo.push([prompt(`Congratulations! You have reached a new best time Score!
+        Please enter your name:`), currScoreTime, getDate()])
+    }
+
+    renderNewTopScore(newFileInfo, difficulty)
+    displayTopScores(difficulty)
+    writeNewTopScore(newFileInfo, level, topScoreFiles)
+}
+
+function renderNewTopScore(fileInfo, difficulty) { 
+//DOM: Render the Top score as a <table> to the page
+    var strHTML = `👑 TOP BEST SCORE FOR ${difficulty}! 👑`
+    for (var i = 0; i < fileInfo.length; i++) {
+        strHTML += `<tr><td class="cell dis">${i+1}.</td>\n`
+        for (var j = 0; j < fileInfo[0].length; j++) {
+            const cell = fileInfo[i][j]
+            // rendering in DOM for all cells 
+            strHTML += `\t<td class="cell dis">${cell}</td>\n` 
+
+        }
+        strHTML += `</tr>\n`
+    }
+    strHTML += `<button onclick="displayTopScores()">OK</button>`
+
+    const elBoard = document.querySelector('.score')
+    elBoard.innerHTML = strHTML
+
+}
+function writeNewTopScore(fileInfo, level, files) {
+    var fileStr = ''
+
+    for (var i = 0; i < fileInfo.length; i++) {
+        for (var j = 0; j < fileInfo[0].length; j++) {
+            fileStr += fileInfo[i][j] + ','
+        }
+        fileStr += ',\n'
+    }
+
+    const fs = require('fs')
+    fs.writeFile(files[level], fileStr, err => {
+        if (err) {
+            console.log('err:', err);
+            return
+        }
+    })
+}
+
+function displayTopScores(){
+    const elScoreDiv = document.querySelector('.score')
+    elScoreDiv.classList.toggle('.hide')
+}
+
+
+
